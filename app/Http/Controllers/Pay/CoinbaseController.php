@@ -23,7 +23,9 @@ class CoinbaseController extends PayController
                         $fees = (double)$this->payGateway->merchant_id;//手续费费率  比如 0.05
                         if($fees>0.00)
                         {
-                            $price_amount =(double)$price_amount * (1.00+$fees);// 价格 * （1 + 0.05）
+                            // 使用bcmul计算，避免浮点数精度丢失
+                            $multiplier = bcadd('1.00', (string)$fees, 4);
+                            $price_amount = bcmul((string)$price_amount, $multiplier, 2);
                         }
 
 
@@ -98,7 +100,7 @@ class CoinbaseController extends PayController
 		$secret = $payGateway->merchant_pem;//共享密钥
 		$sig2 = hash_hmac( 'sha256', $payload, $secret );
         $result_str=array("confirmed","resolved");//返回的结果字符串数组
-		if (!empty( $payload ) && ($sig === $sig2))
+		if (!empty( $payload ) && hash_equals($sig, $sig2))
 		{
 
 			foreach ($event_data['payments'] as $payment) {
