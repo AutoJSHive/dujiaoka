@@ -30,6 +30,9 @@ jobs:
     secrets:
       # GitHub Token for private downloads
       gh-token: ${{ secrets.GH_TOKEN }}
+      # Gotify notification
+      notify-base-url: ${{ secrets.GOTIFY_URL }}
+      notify-token: ${{ secrets.GOTIFY_TOKEN }}
 
     with:
       # Registry settings
