@@ -3,6 +3,11 @@ FROM webdevops/php-nginx:7.4
 # GitHub Token for private download
 ARG GH_TOKEN
 
+# 修复 Debian Buster EOL 源
+RUN rm -f /etc/apt/sources.list.d/nginx.list && \
+    echo "deb http://archive.debian.org/debian buster main" > /etc/apt/sources.list && \
+    echo "deb http://archive.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list
+
 # 安装 MariaDB
 RUN apt-get update && apt-get install -y --no-install-recommends \
     mariadb-server \
