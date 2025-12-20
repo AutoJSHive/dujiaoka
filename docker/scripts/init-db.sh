@@ -11,7 +11,7 @@ if [ ! -d "/var/lib/mysql/mysql" ]; then
     mysql_install_db --user=mysql --datadir=/var/lib/mysql
 
     echo ">>> Starting MariaDB temporarily for setup..."
-    /usr/sbin/mariadbd --user=mysql &
+    /usr/sbin/mysqld --user=mysql &
     pid="$!"
 
     # 等待 MariaDB 启动

@@ -22,7 +22,7 @@ fi
 MARIADB_STARTED_BY_US=false
 if ! mysqladmin ping &>/dev/null; then
     echo ">>> Starting MariaDB temporarily for dujiaoka initialization..."
-    /usr/sbin/mariadbd --user=mysql &
+    /usr/sbin/mysqld --user=mysql &
     MARIADB_PID=$!
     MARIADB_STARTED_BY_US=true
 fi
