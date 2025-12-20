@@ -31,10 +31,6 @@ jobs:
       # GitHub Token for private downloads
       gh-token: ${{ secrets.GH_TOKEN }}
 
-      # Docker Hub (if needed)
-      # dockerhub-username: ${{ secrets.DOCKERHUB_USERNAME }}
-      # dockerhub-token: ${{ secrets.DOCKERHUB_TOKEN }}
-
       # Email notifications
       email-username: ${{ secrets.EMAIL_USERNAME }}
       email-password: ${{ secrets.EMAIL_PASSWORD }}
@@ -63,19 +59,6 @@ jobs:
       context: "."
       platforms: linux/amd64
 
-      # Build arguments (passed through env in reusable workflow)
+      # Build arguments
       build-args: |
         GH_TOKEN=gh-token
-
-      # PR comments
-      comment-enable: true
-
-      # Email notifications
-      email-enable: true
-      email-to: email-username
-      email-server: smtp.qq.com
-      email-port: 465
-
-      # Push notifications
-      push-notify-enable: true
-      push-notify-url: push-notify-api
