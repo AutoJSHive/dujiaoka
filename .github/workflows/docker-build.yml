@@ -39,7 +39,6 @@ jobs:
       # Image names
       image-names: |
         ghcr.io/${{ github.repository }}
-        docker.io/papillon0121/dujiaoka
 
       # Tag rules
       tag-rules: |
