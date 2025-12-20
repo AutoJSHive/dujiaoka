@@ -8,10 +8,11 @@ RUN rm -f /etc/apt/sources.list.d/nginx.list && \
     echo "deb http://archive.debian.org/debian buster main" > /etc/apt/sources.list && \
     echo "deb http://archive.debian.org/debian-security buster/updates main" >> /etc/apt/sources.list
 
-# 安装 MariaDB
+# 安装 MariaDB 和 jq
 RUN apt-get update && apt-get install -y --no-install-recommends \
     mariadb-server \
     mariadb-client \
+    jq \
     && rm -rf /var/lib/apt/lists/* \
     && mkdir -p /run/mysqld \
     && chown mysql:mysql /run/mysqld
@@ -25,15 +26,27 @@ RUN set -e; \
         echo "ERROR: GH_TOKEN is required to download TokenPay during build"; \
         exit 1; \
     fi; \
-    TOKENPAY_URL="https://github.com/AutoJSHive/TokenPay/releases/download/untagged-282fae86c85e3a0fd737/TokenPay-v1.0.4-linux-x64.zip"; \
-    echo "Downloading TokenPay from private release..."; \
+    ASSET_NAME="TokenPay-v1.0.4-linux-x64.zip"; \
+    RELEASE_TAG="untagged-282fae86c85e3a0fd737"; \
+    REPO="AutoJSHive/TokenPay"; \
     TEMP_DIR="/tmp/tokenpay"; \
     mkdir -p "$TEMP_DIR"; \
+    echo "Fetching release info from GitHub API..."; \
+    RELEASE_API_URL="https://api.github.com/repos/${REPO}/releases/tags/${RELEASE_TAG}"; \
+    ASSET_URL=$(curl -sL \
+        -H "Authorization: token $GH_TOKEN" \
+        -H "Accept: application/vnd.github.v3+json" \
+        "$RELEASE_API_URL" | jq -r ".assets[] | select(.name==\"$ASSET_NAME\") | .url"); \
+    if [ -z "$ASSET_URL" ] || [ "$ASSET_URL" = "null" ]; then \
+        echo "ERROR: Could not find asset $ASSET_NAME in release"; \
+        exit 1; \
+    fi; \
+    echo "Downloading TokenPay from: $ASSET_URL"; \
     curl -L -f --retry 3 --retry-delay 5 \
         -H "Authorization: token $GH_TOKEN" \
         -H "Accept: application/octet-stream" \
         -o "$TEMP_DIR/tokenpay.zip" \
-        "$TOKENPAY_URL"; \
+        "$ASSET_URL"; \
     echo "Download completed. Extracting..."; \
     cd "$TEMP_DIR" && \
     unzip -q tokenpay.zip && \
