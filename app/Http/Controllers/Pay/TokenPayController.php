@@ -1,10 +1,10 @@
 <?php
 /**
- * The file was created by LightCountry.
+ * The file was created by Assimon.
  *
- * @author    https://github.com/LightCountry
- * @copyright https://github.com/LightCountry
- * @link      https://github.com/LightCountry/TokenPay
+ * @author    assimon<ashang@utf8.hk>
+ * @copyright assimon<ashang@utf8.hk>
+ * @link      http://utf8.hk/
  */
 
 namespace App\Http\Controllers\Pay;
@@ -26,20 +26,25 @@ class TokenPayController extends PayController
             //构造要请求的参数数组，无需改动
             $parameter = [
                 "ActualAmount" => (float)$this->order->actual_price,//原价
-                "OutOrderId" => $this->order->order_sn, 
-                "OrderUserKey" => $this->order->email, 
+                "OutOrderId" => $this->order->order_sn,
+                "OrderUserKey" => $this->order->email,
                 "Currency" => $this->payGateway->merchant_id,
-                'RedirectUrl' => route('tokenpay-return', ['order_id' => $this->order->order_sn]),
+                'RedirectUrl' => $this->payGateway->pay_handleroute === 'pay/tokenpay-qr' ? route('tokenpay-qr-return', ['order_id' => $this->order->order_sn]) : route('tokenpay-return', ['order_id' => $this->order->order_sn]),
                 'NotifyUrl' => url($this->payGateway->pay_handleroute . '/notify_url'),
             ];
             $parameter['Signature'] = $this->VerifySign($parameter, $this->payGateway->merchant_key);
             $client = new Client([
-				'headers' => [ 'Content-Type' => 'application/json' ]
-			]);
+                'headers' => [ 'Content-Type' => 'application/json' ]
+            ]);
             $response = $client->post($this->payGateway->merchant_pem.'/CreateOrder', ['body' =>  json_encode($parameter)]);
             $body = json_decode($response->getBody()->getContents(), true);
             if (!isset($body['success']) || $body['success'] != true) {
                 return $this->err(__('dujiaoka.prompt.abnormal_payment_channel') . $body['message']);
+            }
+            if ($this->payGateway->pay_handleroute === 'pay/tokenpay-qr') {
+                $result = $body['info'];
+                $result['orderid'] = $this->order->order_sn;
+                return $this->render('static_pages/qrpay2', $result, __('dujiaoka.scan_qrcode_to_pay'));
             }
             return redirect()->away($body['data']);
         } catch (RuleValidationException $exception) {
@@ -79,11 +84,11 @@ class TokenPayController extends PayController
         if (!$payGateway) {
             return 'fail';
         }
-        if($payGateway->pay_handleroute != 'pay/tokenpay'){
+        if($payGateway->pay_handleroute != 'pay/tokenpay' && $payGateway->pay_handleroute != 'pay/tokenpay-qr'){
             return 'fail';
         }
         //合法的数据
-		$signature = $this->VerifySign($data, $payGateway->merchant_key);
+        $signature = $this->VerifySign($data, $payGateway->merchant_key);
         if ($data['Signature'] != $signature) { //不合法的数据
             return 'fail';  //返回失败 继续补单
         } else {

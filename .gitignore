@@ -14,3 +14,6 @@ yarn-error.log
 .idea
 install.lock
 .env.buck
+
+# TokenPay 源代码（仅参考用）
+/TokenPay/

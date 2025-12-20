@@ -6,13 +6,27 @@ services:
     ports:
       - "80:80"
     volumes:
+      # 独角数卡
       - ${DATA_DIR}/dujiaoka/.env:/app/.env
       - ${DATA_DIR}/dujiaoka/install.lock:/app/install.lock
       - ${DATA_DIR}/dujiaoka/public/uploads:/app/public/uploads
       - ${DATA_DIR}/dujiaoka/mysql:/var/lib/mysql
+      # TokenPay 数据持久化
+      - ${DATA_DIR}/tokenpay:/opt/tokenpay
     environment:
       TZ: Asia/Shanghai
+      # 独角数卡数据库
       DB_DATABASE: ${DB_DATABASE:-dujiaoka}
       DB_USERNAME: ${DB_USERNAME:-dujiaoka}
       DB_PASSWORD: ${DB_PASSWORD:-dujiaoka}
+      # TokenPay 配置
+      TOKENPAY_API_TOKEN: ${TOKENPAY_API_TOKEN:-}
+      TOKENPAY_TRON_ADDRESS: ${TOKENPAY_TRON_ADDRESS:-}
+      TOKENPAY_EVM_ADDRESS: ${TOKENPAY_EVM_ADDRESS:-}
+      TOKENPAY_TRONGRID_KEY: ${TOKENPAY_TRONGRID_KEY:-}
+      TOKENPAY_WEBSITE_URL: ${TOKENPAY_WEBSITE_URL:-}
+      TOKENPAY_BASE_CURRENCY: ${TOKENPAY_BASE_CURRENCY:-CNY}
+      # Telegram 通知（可选）
+      TOKENPAY_TG_ADMIN_ID: ${TOKENPAY_TG_ADMIN_ID:-0}
+      TOKENPAY_TG_BOT_TOKEN: ${TOKENPAY_TG_BOT_TOKEN:-}
     restart: always

@@ -56,5 +56,9 @@ Route::group(['prefix' => 'pay', 'namespace' => 'Pay', 'middleware' => ['dujiaok
     Route::get('tokenpay/{payway}/{orderSN}', 'TokenPayController@gateway');
     Route::post('tokenpay/notify_url', 'TokenPayController@notifyUrl');
     Route::get('tokenpay/return_url', 'TokenPayController@returnUrl')->name('tokenpay-return');
+    // tokenpay - 扫码版本
+    Route::get('tokenpay-qr/{payway}/{orderSN}', 'TokenPayController@gateway');
+    Route::post('tokenpay-qr/notify_url', 'TokenPayController@notifyUrl');
+    Route::get('tokenpay-qr/return_url', 'TokenPayController@returnUrl')->name('tokenpay-qr-return');
 
 });
