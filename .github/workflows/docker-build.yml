@@ -31,13 +31,6 @@ jobs:
       # GitHub Token for private downloads
       gh-token: ${{ secrets.GH_TOKEN }}
 
-      # Email notifications
-      email-username: ${{ secrets.EMAIL_USERNAME }}
-      email-password: ${{ secrets.EMAIL_PASSWORD }}
-
-      # Push notifications
-      push-notify-token: ${{ secrets.PUSH_NOTIFY_TOKEN }}
-
     with:
       # Registry settings
       ghcr-enable: true
