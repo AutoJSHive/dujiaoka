@@ -49,9 +49,4 @@ jobs:
         type=ref,event=pr,priority=100
 
       # Build settings
-      context: "."
       platforms: linux/amd64
-
-      # Build arguments
-      build-args: |
-        GH_TOKEN=gh-token
