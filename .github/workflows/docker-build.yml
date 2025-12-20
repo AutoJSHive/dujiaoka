@@ -63,19 +63,19 @@ jobs:
       context: "."
       platforms: linux/amd64
 
-      # Build arguments
+      # Build arguments (passed through env in reusable workflow)
       build-args: |
-        GH_TOKEN=${{ secrets.GH_TOKEN }}
+        GH_TOKEN=gh-token
 
       # PR comments
       comment-enable: true
 
       # Email notifications
       email-enable: true
-      email-to: ${{ secrets.EMAIL_USERNAME }}
+      email-to: email-username
       email-server: smtp.qq.com
       email-port: 465
 
       # Push notifications
       push-notify-enable: true
-      push-notify-url: ${{ secrets.PUSH_NOTIFY_API }}
+      push-notify-url: push-notify-api
