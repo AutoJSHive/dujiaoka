@@ -12,7 +12,6 @@ use Illuminate\Encryption\Encrypter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Redis;
 
 class HomeController extends BaseController
 {
@@ -141,20 +140,10 @@ class HomeController extends BaseController
                 'password' => $request->input('db_password'),
             ];
             $dbConfig['connections']['mysql'] = array_merge($dbConfig['connections']['mysql'], $mysqlDB);
-            // Redis
-            $redisDB = [
-                'host' => $request->input('redis_host'),
-                'password' => $request->input('redis_password', 'null'),
-                'port' => $request->input('redis_port'),
-            ];
-            $dbConfig['redis']['default'] = array_merge($dbConfig['redis']['default'], $redisDB);
             config(['database' => $dbConfig]);
             DB::purge();
             // db测试
             DB::connection()->select('select 1 limit 1');
-            // redis测试
-            Redis::set('dujiaoka_com', 'ok');
-            Redis::get('dujiaoka_com');
             // 获得文件模板
             $envExamplePath = base_path() . DIRECTORY_SEPARATOR . '.env.example';
             $envPath =  base_path() . DIRECTORY_SEPARATOR . '.env';
@@ -176,8 +165,6 @@ class HomeController extends BaseController
             // 写入安装锁
             file_put_contents($installLock, 'install ok');
             return 'success';
-        } catch (\RedisException $exception) {
-            return 'Redis配置错误 :' . $exception->getMessage();
         } catch (QueryException $exception) {
             return '数据库配置错误 :' . $exception->getMessage();
         } catch (\Exception $exception) {
