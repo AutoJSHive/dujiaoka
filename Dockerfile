@@ -1,5 +1,8 @@
 FROM webdevops/php-nginx:7.4
 
+# GitHub Token for private download
+ARG GH_TOKEN
+
 # 安装 MariaDB
 RUN apt-get update && apt-get install -y --no-install-recommends \
     mariadb-server \
@@ -11,9 +14,30 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 复制 MariaDB 轻量化配置
 COPY docker/mariadb/my.cnf /etc/mysql/mariadb.conf.d/99-lightweight.cnf
 
-# 复制 TokenPay
-COPY tokenpay/ /opt/tokenpay/
-RUN chmod +x /opt/tokenpay/TokenPay
+# 下载 TokenPay 私有 release
+RUN set -e; \
+    if [ -z "$GH_TOKEN" ]; then \
+        echo "ERROR: GH_TOKEN is required to download TokenPay during build"; \
+        exit 1; \
+    fi; \
+    TOKENPAY_URL="https://github.com/AutoJSHive/TokenPay/releases/download/untagged-282fae86c85e3a0fd737/TokenPay-v1.0.4-linux-x64.zip"; \
+    echo "Downloading TokenPay from private release..."; \
+    TEMP_DIR="/tmp/tokenpay"; \
+    mkdir -p "$TEMP_DIR"; \
+    curl -L -f --retry 3 --retry-delay 5 \
+        -H "Authorization: token $GH_TOKEN" \
+        -H "Accept: application/octet-stream" \
+        -o "$TEMP_DIR/tokenpay.zip" \
+        "$TOKENPAY_URL"; \
+    echo "Download completed. Extracting..."; \
+    cd "$TEMP_DIR" && \
+    unzip -q tokenpay.zip && \
+    mkdir -p /opt/tokenpay && \
+    mv * /opt/tokenpay/ && \
+    chmod +x /opt/tokenpay/TokenPay && \
+    echo "TokenPay installed successfully." && \
+    ls -la /opt/tokenpay/TokenPay && \
+    rm -rf "$TEMP_DIR"
 
 # 复制应用代码
 COPY . /app
