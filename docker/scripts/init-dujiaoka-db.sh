@@ -2,6 +2,8 @@
 set -e
 
 # 独角数卡数据库初始化（简化版）
+# 注意：此脚本在 entrypoint.d 中运行，supervisor 尚未启动
+# 因此需要自己管理 MariaDB 生命周期
 
 DB_NAME="${DB_DATABASE:-dujiaoka}"
 DB_USER="${DB_USERNAME:-dujiaoka}"
@@ -14,6 +16,15 @@ LOCK_FILE="${DATA_DIR}/mysql/.dujiaoka_initialized"
 if [ -f "$LOCK_FILE" ]; then
     echo ">>> dujiaoka database already initialized, skipping..."
     exit 0
+fi
+
+# 检查 MariaDB 是否已在运行
+MARIADB_STARTED_BY_US=false
+if ! mysqladmin ping &>/dev/null; then
+    echo ">>> Starting MariaDB temporarily for dujiaoka initialization..."
+    /usr/sbin/mariadbd --user=mysql &
+    MARIADB_PID=$!
+    MARIADB_STARTED_BY_US=true
 fi
 
 # 等待数据库就绪
@@ -38,6 +49,13 @@ if [ "$DB_EXISTS" = "0" ]; then
         GRANT ALL PRIVILEGES ON \`${DB_NAME}\`.* TO '${DB_USER}'@'127.0.0.1';
         FLUSH PRIVILEGES;
 EOSQL
+fi
+
+# 如果是我们启动的 MariaDB，则关闭它（supervisor 稍后会正式启动）
+if [ "$MARIADB_STARTED_BY_US" = "true" ]; then
+    echo ">>> Stopping temporary MariaDB..."
+    mysqladmin shutdown || true
+    wait "$MARIADB_PID" 2>/dev/null || true
 fi
 
 # 标记已初始化

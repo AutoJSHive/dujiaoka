@@ -2,6 +2,8 @@
 set -e
 
 # TokenPay 支付方式初始化（简化版）
+# 注意：此脚本在 entrypoint.d 中运行，supervisor 尚未启动
+# 因此需要自己管理 MariaDB 生命周期
 
 DB_NAME="${DB_DATABASE:-dujiaoka}"
 DATA_DIR="${DATA_DIR:-/data}"
@@ -11,6 +13,15 @@ LOCK_FILE="${DATA_DIR}/tokenpay/.pays_initialized"
 if [ -f "$LOCK_FILE" ]; then
     echo ">>> TokenPay payment methods already initialized, skipping..."
     exit 0
+fi
+
+# 检查 MariaDB 是否已在运行
+MARIADB_STARTED_BY_US=false
+if ! mysqladmin ping &>/dev/null; then
+    echo ">>> Starting MariaDB temporarily for TokenPay initialization..."
+    /usr/sbin/mariadbd --user=mysql &
+    MARIADB_PID=$!
+    MARIADB_STARTED_BY_US=true
 fi
 
 # 等待数据库就绪
@@ -63,6 +74,13 @@ fi
 
 # 标记已初始化
 touch "$LOCK_FILE"
+
+# 如果是我们启动的 MariaDB，则关闭它（supervisor 稍后会正式启动）
+if [ "$MARIADB_STARTED_BY_US" = "true" ]; then
+    echo ">>> Stopping temporary MariaDB..."
+    mysqladmin shutdown || true
+    wait "$MARIADB_PID" 2>/dev/null || true
+fi
 
 echo ">>> TokenPay payment methods initialized."
 echo ">>> Note: Payment methods are disabled by default. Enable them in admin panel."
