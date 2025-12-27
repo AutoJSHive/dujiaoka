@@ -26,8 +26,8 @@ DUJIAOKA_ENV="${DATA_DIR}/dujiaoka/.env"
 if [ ! -f "$DUJIAOKA_ENV" ]; then
     echo ">>> Generating dujiaoka .env..."
 
-    # 生成 APP_KEY
-    APP_KEY=$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 32)
+    # 生成 APP_KEY (32 字节 base64 编码 = 44 字符)
+    APP_KEY=$(head -c 32 /dev/urandom | base64)
 
     cat > "$DUJIAOKA_ENV" << EOF
 APP_NAME=${APP_NAME:-独角数卡}
@@ -62,6 +62,18 @@ fi
 # 创建符号链接
 ln -sf "${DATA_DIR}/dujiaoka/.env" /app/.env
 ln -sf "${DATA_DIR}/dujiaoka/uploads" /app/public/uploads
+
+# 确保 .env 文件可被 application 用户写入
+if [ -f "/app/.env" ]; then
+    chown application:application /app/.env
+    chmod 666 /app/.env
+fi
+
+# 确保 .env.example 存在且可读
+if [ -f "/app/.env.example" ]; then
+    chown root:root /app/.env.example
+    chmod 644 /app/.env.example
+fi
 
 # install.lock 处理
 if [ -f "${DATA_DIR}/dujiaoka/install.lock" ]; then

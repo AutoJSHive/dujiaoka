@@ -46,7 +46,8 @@ RUN composer install --ignore-platform-reqs --no-dev --optimize-autoloader
 
 # 设置权限
 RUN chmod -R 755 /app && \
-    chmod -R 777 /app/storage /app/bootstrap/cache
+    chmod -R 777 /app/storage /app/bootstrap/cache && \
+    chmod 666 /app/.env.example 2>/dev/null || true
 
 # 复制 supervisor 配置
 COPY docker/supervisor/mariadb.conf /opt/docker/etc/supervisor.d/
