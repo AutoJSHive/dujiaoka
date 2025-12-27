@@ -73,6 +73,14 @@ fi
 # ============================================
 TOKENPAY_CONFIG="${DATA_DIR}/tokenpay/appsettings.json"
 TOKENPAY_DIR="/opt/tokenpay"
+TOKENPAY_BIN="/opt/tokenpay-bin"
+
+# 复制 TokenPay 可执行文件到挂载目录（首次启动时）
+if [ ! -f "${TOKENPAY_DIR}/TokenPay" ] && [ -f "${TOKENPAY_BIN}/TokenPay" ]; then
+    echo ">>> Copying TokenPay binary to data directory..."
+    cp "${TOKENPAY_BIN}/TokenPay" "${TOKENPAY_DIR}/TokenPay"
+    chmod +x "${TOKENPAY_DIR}/TokenPay"
+fi
 
 # API Token（两边共享）
 API_TOKEN="${TOKENPAY_API_TOKEN:-$(head -c 32 /dev/urandom | base64 | tr -dc 'a-zA-Z0-9' | head -c 32)}"

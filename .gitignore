@@ -17,3 +17,9 @@ install.lock
 
 # TokenPay 源代码（仅参考用）
 /TokenPay/
+
+# TokenPay 下载文件（构建时需要，但不提交）
+TokenPay-*.zip
+
+# Docker 运行时数据
+/data/

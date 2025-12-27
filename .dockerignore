@@ -2,7 +2,6 @@
 .gitignore
 .github
 *.md
-*.zip
 *.log
 node_modules
 vendor
