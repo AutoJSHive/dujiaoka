@@ -85,6 +85,11 @@ fi
 # install.lock 处理
 if [ -f "${DATA_DIR}/dujiaoka/install.lock" ]; then
     ln -sf "${DATA_DIR}/dujiaoka/install.lock" /app/install.lock
+else
+    # 自动创建 install.lock，跳过安装向导
+    echo "install ok" > "${DATA_DIR}/dujiaoka/install.lock"
+    ln -sf "${DATA_DIR}/dujiaoka/install.lock" /app/install.lock
+    echo ">>> [Dujiaoka] Created install.lock to skip installation wizard."
 fi
 
 # ============================================

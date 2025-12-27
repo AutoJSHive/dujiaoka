@@ -68,6 +68,21 @@ else
     echo ">>> [Dujiaoka] Database already exists."
 fi
 
+# 检查是否已导入数据表 (检查 admin_users 表是否存在)
+_DUJIAOKA_TABLE_EXISTS=$(mysql -u root -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${_DUJIAOKA_DB_NAME}' AND table_name='admin_users';" 2>/dev/null || echo "0")
+
+if [ "$_DUJIAOKA_TABLE_EXISTS" = "0" ]; then
+    echo ">>> [Dujiaoka] Importing initial data..."
+    if [ -f "/app/database/sql/install.sql" ]; then
+        mysql -u root "${_DUJIAOKA_DB_NAME}" < "/app/database/sql/install.sql"
+        echo ">>> [Dujiaoka] Initial data imported."
+    else
+        echo ">>> [Dujiaoka] ERROR: install.sql not found!"
+    fi
+else
+    echo ">>> [Dujiaoka] Tables already exist, skipping import."
+fi
+
 # 标记已初始化
 touch "$_DUJIAOKA_LOCK_FILE"
 

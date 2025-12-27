@@ -12,5 +12,7 @@ storage/framework/views/*
 bootstrap/cache/*
 .env
 .env.*
+!.env.example
+!.env.testing
 docker-compose*.yml
 TokenPay/
