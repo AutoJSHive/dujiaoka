@@ -79,6 +79,23 @@ if [ "$_DUJIAOKA_TABLE_EXISTS" = "0" ]; then
     else
         echo ">>> [Dujiaoka] ERROR: install.sql not found!"
     fi
+
+    # 确保 jobs 表存在（database queue 驱动必须）
+    echo ">>> [Dujiaoka] Creating jobs table for queue..."
+    mysql -u root "${_DUJIAOKA_DB_NAME}" <<-EOSQL
+        CREATE TABLE IF NOT EXISTS \`jobs\` (
+            \`id\` bigint(20) unsigned NOT NULL AUTO_INCREMENT,
+            \`queue\` varchar(255) COLLATE utf8mb4_unicode_ci NOT NULL,
+            \`payload\` longtext COLLATE utf8mb4_unicode_ci NOT NULL,
+            \`attempts\` tinyint(3) unsigned NOT NULL,
+            \`reserved_at\` int(10) unsigned DEFAULT NULL,
+            \`available_at\` int(10) unsigned NOT NULL,
+            \`created_at\` int(10) unsigned NOT NULL,
+            PRIMARY KEY (\`id\`),
+            KEY \`jobs_queue_index\` (\`queue\`)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+EOSQL
+    echo ">>> [Dujiaoka] Jobs table ensured."
 else
     echo ">>> [Dujiaoka] Tables already exist, skipping import."
 fi

@@ -72,7 +72,7 @@ fi
 # 强制确保缓存和队列驱动使用文件系统（容器内无 Redis）
 if [ -f "/app/.env" ]; then
     sed -i 's/^CACHE_DRIVER=.*/CACHE_DRIVER=file/' /app/.env
-    sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=sync/' /app/.env
+    sed -i 's/^QUEUE_CONNECTION=.*/QUEUE_CONNECTION=database/' /app/.env
     sed -i 's/^SESSION_DRIVER=.*/SESSION_DRIVER=file/' /app/.env
 fi
 

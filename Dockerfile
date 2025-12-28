@@ -52,6 +52,7 @@ RUN chmod -R 755 /app && \
 # 复制 supervisor 配置
 COPY docker/supervisor/mariadb.conf /opt/docker/etc/supervisor.d/
 COPY docker/supervisor/tokenpay.conf /opt/docker/etc/supervisor.d/
+COPY docker/supervisor/dujiaoka-worker.conf /opt/docker/etc/supervisor.d/
 
 # 复制启动脚本（按执行顺序命名）
 COPY docker/scripts/init-db.sh /opt/docker/provision/entrypoint.d/10-init-db.sh
