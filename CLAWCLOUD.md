@@ -7,32 +7,51 @@
 - **端口**: `80`
 - **数据挂载**: `/data`
 
-### 2. 环境变量（必需）
+### 2. 生产环境变量清单
 
-#### 独角数卡基础配置
+将以下变量一次性填入平台的环境变量表单（平台只有一组变量）：
+
 ```
-APP_URL=https://your-domain.com
-ADMIN_PATH=admin        # 后台路径，建议修改
-DB_PASSWORD=your_password    # 数据库密码，建议修改
+# ===== 必填项 =====
+DATA_DIR=/data
+APP_URL=https://your-domain.com          # ← 改成你的真实域名
+
+# ===== 可选修改（有默认值）=====
+APP_NAME=独角数卡
+APP_DEBUG=false
+ADMIN_LANGUAGE=zh_CN
+ADMIN_PATH=admin                          # ← 建议改成随机路径，如 admin_xyz123
+ADMIN_HTTPS=false                         # ← 如果用 HTTPS 改为 true
+
+# 数据库配置（建议修改密码）
+DB_DATABASE=dujiaoka
+DB_USERNAME=dujiaoka
+DB_PASSWORD=dujiaoka                      # ← 建议改成强密码
+
+# ===== TokenPay 配置（如不使用可全部留空）=====
+TOKENPAY_API_TOKEN=                       # ← 留空，系统自动生成
+TOKENPAY_WEBSITE_URL=https://your-domain.com  # ← 改成你的真实域名
+TOKENPAY_BASE_CURRENCY=CNY
+
+# 钱包地址（使用 TokenPay 时必填）
+TOKENPAY_TRON_ADDRESS=                    # ← 你的 TRON 收款地址
+TOKENPAY_EVM_ADDRESS=                     # ← 你的 EVM 收款地址（ETH/BSC等）
+TOKENPAY_TRONGRID_KEY=                    # ← TronGrid API Key（trongrid.io 申请）
+
+# Telegram 通知（可选）
+TOKENPAY_TG_ADMIN_ID=0
+TOKENPAY_TG_BOT_TOKEN=
 ```
 
-#### TokenPay 支付配置（冷钱包）
-```
-TOKENPAY_TRON_ADDRESS=TYourTronAddressHere      # TRC20收款地址
-TOKENPAY_EVM_ADDRESS=0xYourEvmAddressHere        # ERC20收款地址
-TOKENPAY_TRONGRID_KEY=your-trongrid-api-key      # TronGrid API Key
-TOKENPAY_WEBSITE_URL=https://your-domain.com     # 外网访问地址
-```
+### 变量说明
 
-### 3. 可选配置
-```
-# 基础货币（默认 CNY）
-TOKENPAY_BASE_CURRENCY=USD
-
-# Telegram 通知
-TOKENPAY_TG_ADMIN_ID=12345678
-TOKENPAY_TG_BOT_TOKEN=bot_token_here
-```
+| 变量 | 是否必填 | 说明 |
+|------|----------|------|
+| `APP_URL` | ✅ 必填 | 你的商店访问地址 |
+| `TOKENPAY_API_TOKEN` | ❌ 留空 | 系统自动生成，写入 `/data/tokenpay/.api_token` |
+| `TOKENPAY_*_ADDRESS` | ⚠️ 按需 | 使用 TokenPay 收款时才需要填写真实钱包地址 |
+| `TOKENPAY_TRONGRID_KEY` | ⚠️ 按需 | 使用 TRON 收款时需要，去 [trongrid.io](https://www.trongrid.io/) 免费申请 |
+| `DB_PASSWORD` | 🔒 建议修改 | 默认密码不安全，建议改成强密码 |
 
 ## 启动后操作
 
