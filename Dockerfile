@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     mariadb-client \
     jq \
     supervisor \
-    && rm -rf /var/lib/apt/lists/* \
+    && rm -rf /var/lib/apt/lists/*\
     && mkdir -p /run/mysqld \
     && chown mysql:mysql /run/mysqld \
     && mkdir -p /var/log/supervisor
@@ -22,7 +22,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 # 复制 MariaDB 轻量化配置
 COPY docker/mariadb/my.cnf /etc/mysql/mariadb.conf.d/99-lightweight.cnf
 
-# 复制 TokenPay 到临时位置（/opt/tokenpay 会被挂载覆盖）
+# 复制 TokenPay 到临时位置
 COPY TokenPay-v1.0.4-linux-x64.zip /tmp/tokenpay.zip
 RUN set -e; \
     TEMP_DIR="/tmp/tokenpay"; \
