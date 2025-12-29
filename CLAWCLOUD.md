@@ -27,6 +27,8 @@ ADMIN_HTTPS=false                         # ← 如果用 HTTPS 改为 true
 DB_DATABASE=dujiaoka
 DB_USERNAME=dujiaoka
 DB_PASSWORD=dujiaoka                      # ← 建议改成强密码
+DB_HOST=localhost                         # ← 避免 127.0.0.1 被 MariaDB 拒绝
+DB_PORT=3306
 
 # ===== TokenPay 配置（如不使用可全部留空）=====
 TOKENPAY_API_TOKEN=                       # ← 留空，系统自动生成

@@ -23,6 +23,50 @@ chmod -R 755 "${DATA_DIR}/tokenpay"
 # ============================================
 DUJIAOKA_ENV="${DATA_DIR}/dujiaoka/.env"
 
+_generate_app_key() {
+    head -c 32 /dev/urandom | base64
+}
+
+_is_valid_app_key() {
+    local key="$1"
+    local b64
+    local bytes
+
+    if [[ ! "$key" =~ ^base64:[A-Za-z0-9+/=]+$ ]]; then
+        return 1
+    fi
+
+    b64="${key#base64:}"
+    bytes=$(printf '%s' "$b64" | base64 -d 2>/dev/null | wc -c || true)
+    [ "$bytes" -eq 32 ]
+}
+
+_ensure_app_key() {
+    local key_line
+    local key_value
+    local new_key
+
+    if [ ! -f "$DUJIAOKA_ENV" ]; then
+        return 0
+    fi
+
+    key_line=$(grep -E '^APP_KEY=' "$DUJIAOKA_ENV" || true)
+    key_value="${key_line#APP_KEY=}"
+
+    if _is_valid_app_key "$key_value"; then
+        return 0
+    fi
+
+    new_key="base64:$(_generate_app_key)"
+    if [ -n "$key_line" ]; then
+        sed -i "s/^APP_KEY=.*/APP_KEY=${new_key}/" "$DUJIAOKA_ENV"
+    else
+        echo "APP_KEY=${new_key}" >> "$DUJIAOKA_ENV"
+    fi
+
+    echo ">>> [Dujiaoka] APP_KEY missing or invalid, regenerated."
+}
+
 if [ ! -f "$DUJIAOKA_ENV" ]; then
     echo ">>> Generating dujiaoka .env..."
 
@@ -58,6 +102,8 @@ ADMIN_HTTPS=${ADMIN_HTTPS:-false}
 EOF
     echo ">>> dujiaoka .env generated."
 fi
+
+_ensure_app_key
 
 # 创建符号链接
 ln -sf "${DATA_DIR}/dujiaoka/.env" /app/.env

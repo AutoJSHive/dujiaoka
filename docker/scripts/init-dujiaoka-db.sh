@@ -57,16 +57,22 @@ if [ "$_DUJIAOKA_DB_EXISTS" = "0" ]; then
     echo ">>> [Dujiaoka] Creating database..."
     mysql -u root <<-EOSQL
         CREATE DATABASE IF NOT EXISTS \`${_DUJIAOKA_DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-        CREATE USER IF NOT EXISTS '${_DUJIAOKA_DB_USER}'@'localhost' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
-        CREATE USER IF NOT EXISTS '${_DUJIAOKA_DB_USER}'@'127.0.0.1' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
-        GRANT ALL PRIVILEGES ON \`${_DUJIAOKA_DB_NAME}\`.* TO '${_DUJIAOKA_DB_USER}'@'localhost';
-        GRANT ALL PRIVILEGES ON \`${_DUJIAOKA_DB_NAME}\`.* TO '${_DUJIAOKA_DB_USER}'@'127.0.0.1';
-        FLUSH PRIVILEGES;
 EOSQL
     echo ">>> [Dujiaoka] Database created."
 else
     echo ">>> [Dujiaoka] Database already exists."
 fi
+
+# 幂等授权：每次启动都确保权限存在
+echo ">>> [Dujiaoka] Ensuring database grants..."
+mysql -u root <<-EOSQL
+    CREATE USER IF NOT EXISTS '${_DUJIAOKA_DB_USER}'@'localhost' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
+    CREATE USER IF NOT EXISTS '${_DUJIAOKA_DB_USER}'@'127.0.0.1' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
+    GRANT ALL PRIVILEGES ON \`${_DUJIAOKA_DB_NAME}\`.* TO '${_DUJIAOKA_DB_USER}'@'localhost';
+    GRANT ALL PRIVILEGES ON \`${_DUJIAOKA_DB_NAME}\`.* TO '${_DUJIAOKA_DB_USER}'@'127.0.0.1';
+    FLUSH PRIVILEGES;
+EOSQL
+echo ">>> [Dujiaoka] Database grants ensured."
 
 # 检查是否已导入数据表 (检查 admin_users 表是否存在)
 _DUJIAOKA_TABLE_EXISTS=$(mysql -u root -N -e "SELECT COUNT(*) FROM information_schema.tables WHERE table_schema='${_DUJIAOKA_DB_NAME}' AND table_name='admin_users';" 2>/dev/null || echo "0")
