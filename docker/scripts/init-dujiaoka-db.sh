@@ -64,10 +64,13 @@ else
 fi
 
 # 幂等授权：每次启动都确保权限存在
+# 同步用户名与密码，避免环境变量与数据库用户不一致
 echo ">>> [Dujiaoka] Ensuring database grants..."
 mysql -u root <<-EOSQL
     CREATE USER IF NOT EXISTS '${_DUJIAOKA_DB_USER}'@'localhost' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
     CREATE USER IF NOT EXISTS '${_DUJIAOKA_DB_USER}'@'127.0.0.1' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
+    ALTER USER '${_DUJIAOKA_DB_USER}'@'localhost' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
+    ALTER USER '${_DUJIAOKA_DB_USER}'@'127.0.0.1' IDENTIFIED BY '${_DUJIAOKA_DB_PASS}';
     GRANT ALL PRIVILEGES ON \`${_DUJIAOKA_DB_NAME}\`.* TO '${_DUJIAOKA_DB_USER}'@'localhost';
     GRANT ALL PRIVILEGES ON \`${_DUJIAOKA_DB_NAME}\`.* TO '${_DUJIAOKA_DB_USER}'@'127.0.0.1';
     FLUSH PRIVILEGES;

@@ -67,6 +67,33 @@ _ensure_app_key() {
     echo ">>> [Dujiaoka] APP_KEY missing or invalid, regenerated."
 }
 
+_escape_sed_replacement() {
+    printf '%s' "$1" | sed -e 's/[\\/|&]/\\&/g'
+}
+
+_ensure_env_kv() {
+    local key="$1"
+    local value="$2"
+    local current_line
+    local escaped_value
+
+    if [ ! -f "$DUJIAOKA_ENV" ]; then
+        return 0
+    fi
+
+    current_line=$(grep -E "^${key}=" "$DUJIAOKA_ENV" || true)
+    if [ "$current_line" = "${key}=${value}" ]; then
+        return 0
+    fi
+
+    escaped_value=$(_escape_sed_replacement "$value")
+    if [ -n "$current_line" ]; then
+        sed -i "s|^${key}=.*|${key}=${escaped_value}|" "$DUJIAOKA_ENV"
+    else
+        echo "${key}=${value}" >> "$DUJIAOKA_ENV"
+    fi
+}
+
 if [ ! -f "$DUJIAOKA_ENV" ]; then
     echo ">>> Generating dujiaoka .env..."
 
@@ -104,6 +131,12 @@ EOF
 fi
 
 _ensure_app_key
+
+if [ -f "$DUJIAOKA_ENV" ]; then
+    _ensure_env_kv "DB_USERNAME" "${DB_USERNAME:-dujiaoka}"
+    _ensure_env_kv "DB_PASSWORD" "${DB_PASSWORD:-dujiaoka}"
+    echo ">>> [Dujiaoka] Ensured DB_USERNAME/DB_PASSWORD in .env."
+fi
 
 # 创建符号链接
 ln -sf "${DATA_DIR}/dujiaoka/.env" /app/.env
